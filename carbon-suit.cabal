@@ -1,0 +1,26 @@
+name:                carbon-suit
+version:             0.0
+description:         Simple text format.
+synopsis:            Simple text format.
+license:             BSD3
+license-file:        LICENSE
+homepage:            http://
+author:              Vo Minh Thu
+category:            Language
+maintainer:          <noteed@gmail.com>
+build-type:          Simple
+Cabal-Version: >= 1.2
+
+library
+  build-depends:       base, parsec >= 3.0.0,
+                       utf8-string, xhtml, filepath
+  ghc-options:         -Wall
+                       -O2
+  exposed-modules:     Text.CarbonSuit
+  other-modules:       Text.CarbonSuit.Carbon,
+                       Text.CarbonSuit.XHtml
+
+Executable carbonsuit
+  main-is:             carbonsuit.hs
+  ghc-options:         -O2 -Wall 
+
