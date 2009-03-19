@@ -11,7 +11,8 @@ import Text.Parsec
 renderAsStandAloneXHtml :: Carbon -> String
 renderAsStandAloneXHtml c = renderHtml $ -- or use showHtml
   header << (styleSheetLink "/my.css" +++ thetitle << tit)
-  +++ body << (tag "a" ! [href "/"] << "Interlocked Features" +++ carbonToXHtml c)
+  +++ body << (tag "a" ! [href "/"] << "Interlocked Features"
+  +++ carbonToXHtml c +++ textJavascript "/my-ga.js")
 
   where [tit] = getTitles c  -- TODO only one title handled for now
 
@@ -64,4 +65,8 @@ xBlock _ _ = thespan ! [theclass "unimplemented"] << "unimplemented"
 styleSheetLink :: String -> Html
 styleSheetLink fn =
   thelink ! [rel "stylesheet", thetype "text/css", href fn] << noHtml
+
+textJavascript :: String -> Html
+textJavascript fn =
+  tag "script" ! [thetype "text/javascript", src fn] << noHtml
 
