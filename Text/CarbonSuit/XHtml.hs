@@ -12,9 +12,18 @@ renderAsStandAloneXHtml :: Carbon -> String
 renderAsStandAloneXHtml c = renderHtml $ -- or use showHtml
   header << (styleSheetLink "/my.css" +++ thetitle << tit)
   +++ body << (tag "a" ! [href "/"] << "Interlocked Features"
-  +++ carbonToXHtml c +++ textJavascript "/my-ga.js")
+  +++ carbonToXHtml c +++ codeJavascript ga1 +++ codeJavascript ga2)
 
   where [tit] = getTitles c  -- TODO only one title handled for now
+        ga1 = "var gaJsHost = ((\"https:\" == document.location.protocol)"
+              ++" ? \"https://ssl.\" : \"http://www.\");\n"
+              ++ "document.write(unescape(\"%3Cscript src='\" + gaJsHost "
+              ++ "+ \"google-analytics.com/ga.js' "
+              ++ "type='text/javascript'%3E%3C/script%3E\"));\n"
+        ga2 = "try {\n"
+              ++ "var pageTracker = _gat._getTracker(\"UA-7990941-1\");\n"
+              ++ "pageTracker._trackPageview();\n"
+              ++ "} catch(err) {}\n"
 
 renderAsXHtml :: Carbon -> String
 renderAsXHtml = renderHtmlFragment . carbonToXHtml
@@ -58,7 +67,7 @@ xBlock c (Text ls) = paragraph << (map x is)
                        [Reference _ v] -> v
                        _ -> error $ "Searching " ++ k ++ " from " ++ show is
 
-xBlock _ (Prompt ls) = (pre ! [theclass "prompt"]) (toHtml $ unlines ls)
+xBlock _ (Prompt ls) = (pre ! [theclass "prompt"]) (primHtml $ unlines ls)
 
 xBlock _ _ = thespan ! [theclass "unimplemented"] << "unimplemented"
 
@@ -66,7 +75,11 @@ styleSheetLink :: String -> Html
 styleSheetLink fn =
   thelink ! [rel "stylesheet", thetype "text/css", href fn] << noHtml
 
-textJavascript :: String -> Html
-textJavascript fn =
+srcJavascript :: String -> Html
+srcJavascript fn =
   tag "script" ! [thetype "text/javascript", src fn] << noHtml
+
+codeJavascript :: String -> Html
+codeJavascript code =
+  tag "script" ! [thetype "text/javascript"] << (primHtml code)
 
