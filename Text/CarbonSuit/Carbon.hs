@@ -180,12 +180,12 @@ promptBlock :: Parsec String ParserState Block
 promptBlock = do
   skipSpaces
   p <- getPosition
-  if sourceColumn p /= 5
+  if sourceColumn p < 5 || even (sourceColumn p)
     then parserFail "Not a prompt block."
     else do
       ls <- many1 (notFollowedBy (try stop) >> anyLine)
       blanklines
-      return $ Prompt (head ls : (map (drop 4) $ tail ls))
+      return $ Prompt (map (drop 4) $ (replicate (sourceColumn p - 1) ' ' ++ head ls) : tail ls)
 
 stop :: Parsec String ParserState Char
 stop = try (blankline <|> (attributeLine >> return ' '))
@@ -247,5 +247,15 @@ tt s = do
       do putStrLn "Error :"
          print err
     Right a  -> putStrLn (show a)
+
+----------------------------------------------------------------------
+-- Carbon processing
+----------------------------------------------------------------------
+
+-- Merges consecutive Prompt blocks into one block.
+mergePromptBlocks (Carbon fn bs) = Carbon fn (go bs)
+  where go (Prompt p1 : Prompt p2 : rest) = go $ Prompt (p1 ++ [""] ++ p2) : rest
+        go (b : rest) = b : go rest
+        go [] = []
 
 

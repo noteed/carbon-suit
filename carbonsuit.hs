@@ -19,7 +19,8 @@ main = do
       case mode of
         "-d" -> IOU.putStrLn (displayCarbon a)
         "-x" -> do
-          IOU.writeFile (dropExtension fn ++ ".html") (renderAsStandAloneXHtml a)
-          IOU.writeFile (dropExtension fn ++ ".body.html") (renderAsXHtml a)
+          let a' = mergePromptBlocks a
+          IOU.writeFile (dropExtension fn ++ ".html") (renderAsStandAloneXHtml a')
+          IOU.writeFile (dropExtension fn ++ ".body.html") (renderAsXHtml a')
         _    -> IOU.putStrLn ("Unrecognised mode : " ++ mode)
 

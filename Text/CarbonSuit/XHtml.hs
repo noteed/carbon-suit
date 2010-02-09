@@ -65,7 +65,7 @@ xBlock c (Text ls) = paragraph << (map x is)
         x (Ref k) = tag "a" ! [href url] << k
           where url = case lookupRefs k c of
                        [Reference _ v] -> v
-                       _ -> error $ "Searching " ++ k ++ " from " ++ show is
+                       _ -> error $ "Can't find the reference " ++ k ++ " from " ++ show is
 
 xBlock _ (Prompt ls) = (pre ! [theclass "prompt"]) (primHtml $ unlines ls)
 
