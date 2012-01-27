@@ -1,12 +1,14 @@
 module Text.CarbonSuit.XHtml where
 
-import Text.CarbonSuit.Carbon
 import Text.XHtml.Strict
 import System.FilePath (dropExtension)
 -- This is here because I parse Text into Inline's,
 -- but it should be done before, something
 -- like LightCarbon and FullCarbon.
 import Text.Parsec
+
+import Text.CarbonSuit.Carbon
+import Text.CarbonSuit.Types
 
 renderAsStandAloneXHtml :: Carbon -> String
 renderAsStandAloneXHtml c = renderHtml $ -- or use showHtml

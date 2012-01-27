@@ -18,6 +18,8 @@ library
                        -O2
   exposed-modules:     Text.CarbonSuit
   other-modules:       Text.CarbonSuit.Carbon,
+                       Text.CarbonSuit.Processing,
+                       Text.CarbonSuit.Types,
                        Text.CarbonSuit.XHtml
 
 Executable carbonsuit

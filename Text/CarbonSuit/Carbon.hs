@@ -1,32 +1,12 @@
--- 2009.03.11
--- 2009.03.12
---
--- The idea of the Null block is from Pandoc.
--- There are other similarities though
--- (but Inline Str is stolen).
---
 -- Only UTF-8 output.
---
 module Text.CarbonSuit.Carbon where
 
--- I'd like to use bytestrings...
--- import qualified Data.ByteString.UTF8 as U
 import Text.Parsec
--- import Text.Parsec.ByteString
 
-data Carbon = Carbon { filename :: String, blocks :: [Block] }
-  deriving Show
+import Text.CarbonSuit.Types
 
 displayCarbon :: Carbon -> String
 displayCarbon (Carbon _ bs) = unlines (map displayBlock bs)
-
-data Block = Attribute String String
-           | GeneralDot String String
-           | Reference String String
-           | Text [String]
-           | Prompt [String]
-           | Null Char
-  deriving Show
 
 displayBlock :: Block -> String
 displayBlock = d where
@@ -36,42 +16,6 @@ displayBlock = d where
   d (Text ls)        = "(text)\n" ++ unlines ls
   d (Prompt ls)      = "(prom)\n" ++ unlines ls
   d (Null c)         = "(null) '" ++ [c] ++ "'"
-
-isAttribute :: Block -> Bool
-isAttribute (Attribute _ _) = True
-isAttribute _ = False
-
-isAttributeWithKey :: String -> Block -> Bool
-isAttributeWithKey k1 (Attribute k2 _) = if k1 == k2 then True else False
-isAttributeWithKey _ _ = False
-
-isReference :: Block -> Bool
-isReference (Reference _ _) = True
-isReference _ = False
-
-isReferenceWithKey :: String -> Block -> Bool
-isReferenceWithKey k1 (Reference k2 _) = if k1 == k2 then True else False
-isReferenceWithKey _ _ = False
-
-attributeValue :: Block -> String
-attributeValue (Attribute _ s) = s
-attributeValue _ = error "attributeValue not applied to an Attribute block."
-
-getAttributes :: String -> Carbon -> [String]
-getAttributes k c = map attributeValue $
-  filter (isAttributeWithKey k) (blocks c)
-
-getAuthors :: Carbon -> [String]
-getAuthors = getAttributes "author"
-
-getTitles :: Carbon -> [String]
-getTitles = getAttributes "title"
-
-getDates :: Carbon -> [String]
-getDates = getAttributes "date"
-
-lookupRefs :: String -> Carbon -> [Block]
-lookupRefs k c = filter (isReferenceWithKey k) (blocks c)
 
 ----------------------------------------------------------------------
 -- Main Carbon suit parsers
@@ -207,11 +151,6 @@ nullBlock = anyChar >>= return . Null
 -- Secondary Carbon suit parsers (e.g. to parse a Text block)
 ----------------------------------------------------------------------
 
-data Inline = Str String
-            | Cod String
-            | Ref String
-  deriving Show
-
 strChar :: Parsec String st Char
 strChar = noneOf "[`"
 
@@ -247,16 +186,4 @@ tt s = do
       do putStrLn "Error :"
          print err
     Right a  -> putStrLn (show a)
-
-----------------------------------------------------------------------
--- Carbon processing
-----------------------------------------------------------------------
-
--- Merges consecutive Prompt blocks into one block.
-mergePromptBlocks :: Carbon -> Carbon
-mergePromptBlocks (Carbon fn bs) = Carbon fn (go bs)
-  where go (Prompt p1 : Prompt p2 : rest) = go $ Prompt (p1 ++ [""] ++ p2) : rest
-        go (b : rest) = b : go rest
-        go [] = []
-
 

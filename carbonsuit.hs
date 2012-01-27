@@ -1,10 +1,14 @@
 module Main where
 
-import qualified System.IO.UTF8 as IOU
 import System.Environment (getArgs)
 import System.FilePath (dropExtension)
+
+import qualified System.IO.UTF8 as IOU
+
 import Text.Parsec
+
 import Text.CarbonSuit
+import Text.CarbonSuit.Processing
 
 main :: IO ()
 main = do
