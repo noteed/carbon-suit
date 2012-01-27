@@ -86,7 +86,7 @@ initialPS = PS
 parseCarbon :: String -> Parsec String ParserState Carbon
 parseCarbon fn = do
   -- Skip everything befor the first attribute.
-  blanklines >> many (try normalParagraph)
+  _ <- blanklines >> many (try normalParagraph)
 
   -- Parse the document as a list of blocks.
   manyTill block eof >>= return . Carbon fn
@@ -125,7 +125,7 @@ generalDotLine = do
 generalDotBlock :: Parsec String ParserState Block
 generalDotBlock = do
   (k,v) <- generalDotLine
-  blanklines
+  _ <- blanklines
   return $ GeneralDot k v
 
 -- A line with an attribute.
@@ -143,7 +143,7 @@ attributeLine = do
 attributeBlock :: Parsec String ParserState Block
 attributeBlock = do
   (k,v) <- attributeLine
-  blanklines
+  _ <- blanklines
   return $ Attribute k v
 
 referenceLine :: Parsec String ParserState (String,String)
@@ -153,7 +153,7 @@ referenceLine = do
   if odd (sourceColumn p)
     then parserFail "Odd indentation : not a reference block."
     else do
-      char '['
+      _ <- char '['
       k <- many1 (noneOf "]\n")
       string "]:" >> skipSpaces
       v <- manyTill anyChar newline
@@ -162,7 +162,7 @@ referenceLine = do
 referenceBlock :: Parsec String ParserState Block
 referenceBlock = do
   (k,v) <- referenceLine
-  blanklines
+  _ <- blanklines
   return $ Reference k v
 
 textBlock :: Parsec String ParserState Block
@@ -173,7 +173,7 @@ textBlock = do
     then parserFail "Odd indentation : not a text block."
     else do
       ls <- many1 (notFollowedBy stop >> skipSpaces >> anyLine)
-      blanklines
+      _ <- blanklines
       return $ Text ls
 
 promptBlock :: Parsec String ParserState Block
@@ -184,7 +184,7 @@ promptBlock = do
     then parserFail "Not a prompt block."
     else do
       ls <- many1 (notFollowedBy (try stop) >> anyLine)
-      blanklines
+      _ <- blanklines
       return $ Prompt (map (drop 4) $ (replicate (sourceColumn p - 1) ' ' ++ head ls) : tail ls)
 
 stop :: Parsec String ParserState Char
@@ -220,14 +220,14 @@ str = many1 strChar >>= return . Str
 
 cod :: Parsec String st Inline
 cod = do
-  char '`'
+  _ <- char '`'
   k <- manyTill anyChar (char '`')
   skipSpaces
   return (Cod k)
 
 ref :: Parsec String st Inline
 ref = do
-  char '['
+  _ <- char '['
   k <- manyTill anyChar (char ']')
   skipSpaces
   return (Ref k)
@@ -253,6 +253,7 @@ tt s = do
 ----------------------------------------------------------------------
 
 -- Merges consecutive Prompt blocks into one block.
+mergePromptBlocks :: Carbon -> Carbon
 mergePromptBlocks (Carbon fn bs) = Carbon fn (go bs)
   where go (Prompt p1 : Prompt p2 : rest) = go $ Prompt (p1 ++ [""] ++ p2) : rest
         go (b : rest) = b : go rest
